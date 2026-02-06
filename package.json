@@ -1,0 +1,145 @@
+{
+  "name": "ai-infinite-dialog",
+  "displayName": "AI Infinite Dialog",
+  "description": "AI 无限对话反馈系统 - 自动启动 MCP 服务，注入全局规则，提供反馈面板",
+  "version": "1.0.5",
+  "publisher": "ai-dialog",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ai-dialog/ai-infinite-dialog"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "ai-dialog",
+          "title": "AI Dialog",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "ai-dialog": [
+        {
+          "type": "webview",
+          "id": "ai-dialog.settingsView",
+          "name": "设置"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "ai-infinite-dialog.openSettings",
+        "title": "AI Dialog: 打开设置面板"
+      },
+      {
+        "command": "ai-infinite-dialog.startServer",
+        "title": "AI Dialog: 启动 MCP 服务"
+      },
+      {
+        "command": "ai-infinite-dialog.stopServer",
+        "title": "AI Dialog: 停止 MCP 服务"
+      },
+      {
+        "command": "ai-infinite-dialog.configureIDE",
+        "title": "AI Dialog: 配置 IDE"
+      },
+      {
+        "command": "ai-infinite-dialog.injectRules",
+        "title": "AI Dialog: 注入全局规则"
+      },
+      {
+        "command": "ai-infinite-dialog.showStatus",
+        "title": "AI Dialog: 查看状态"
+      },
+      {
+        "command": "ai-infinite-dialog.editRules",
+        "title": "AI Dialog: 编辑规则"
+      },
+      {
+        "command": "ai-infinite-dialog.viewLogs",
+        "title": "AI Dialog: 查看日志"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "ai-infinite-dialog.openSettings",
+        "key": "ctrl+shift+d",
+        "mac": "cmd+shift+d"
+      },
+      {
+        "command": "ai-infinite-dialog.startServer",
+        "key": "ctrl+shift+s",
+        "mac": "cmd+shift+s",
+        "when": "!ai-dialog.serverRunning"
+      }
+    ],
+    "configuration": {
+      "title": "AI Infinite Dialog",
+      "properties": {
+        "ai-infinite-dialog.autoStart": {
+          "type": "boolean",
+          "default": true,
+          "description": "插件启动时自动启动 MCP 服务"
+        },
+        "ai-infinite-dialog.autoConfigureIDE": {
+          "type": "boolean",
+          "default": true,
+          "description": "自动配置 IDE 的 MCP 设置"
+        },
+        "ai-infinite-dialog.autoInjectRules": {
+          "type": "boolean",
+          "default": true,
+          "description": "自动注入全局规则"
+        },
+        "ai-infinite-dialog.serverPort": {
+          "type": "number",
+          "default": 3456,
+          "description": "MCP 服务端口"
+        },
+        "ai-infinite-dialog.targetIDE": {
+          "type": "string",
+          "enum": ["windsurf"],
+          "default": "windsurf",
+          "description": "目标 IDE"
+        },
+        "ai-infinite-dialog.showNotifications": {
+          "type": "boolean",
+          "default": true,
+          "description": "显示通知消息"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile",
+    "lint": "eslint src --ext ts",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "eslint": "^8.54.0",
+    "typescript": "^5.3.0",
+    "@vscode/vsce": "^2.22.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  }
+}
