@@ -48,7 +48,7 @@
 
 ### 方法 1：从 VSIX 安装（推荐）
 
-在 [Releases](https://github.com/ai-dialog/ai-infinite-dialog/releases) 页面下载最新的 `.vsix` 文件，然后：
+在 [Releases](https://github.com/ova111/ai-infinite-dialog/releases) 页面下载最新的 `.vsix` 文件，然后：
 
 ```bash
 code --install-extension ai-infinite-dialog-x.x.x.vsix
@@ -59,7 +59,7 @@ code --install-extension ai-infinite-dialog-x.x.x.vsix
 ### 方法 2：从源码构建
 
 ```bash
-git clone https://github.com/ai-dialog/ai-infinite-dialog.git
+git clone https://github.com/ova111/ai-infinite-dialog.git
 cd ai-infinite-dialog
 npm install
 npm run package
@@ -69,7 +69,7 @@ npm run package
 ### 方法 3：开发模式
 
 ```bash
-git clone https://github.com/ai-dialog/ai-infinite-dialog.git
+git clone https://github.com/ova111/ai-infinite-dialog.git
 cd ai-infinite-dialog
 npm install
 npm run watch

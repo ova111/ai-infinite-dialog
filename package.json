@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ai-dialog/ai-infinite-dialog"
+    "url": "https://github.com/ova111/ai-infinite-dialog"
   },
   "engines": {
     "vscode": "^1.85.0"

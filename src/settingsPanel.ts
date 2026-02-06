@@ -628,7 +628,7 @@ export class SettingsPanel {
         }
         
         function openGitHub() {
-            vscode.postMessage({ command: 'openLink', url: 'https://github.com/ai-dialog/ai-infinite-dialog' });
+            vscode.postMessage({ command: 'openLink', url: 'https://github.com/ova111/ai-infinite-dialog' });
         }
     </script>
 </body>
