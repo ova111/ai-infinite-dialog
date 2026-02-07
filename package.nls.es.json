@@ -14,5 +14,6 @@
     "config.serverPort.desc": "Puerto del servidor MCP",
     "config.targetIDE.desc": "IDE destino",
     "config.showNotifications.desc": "Mostrar mensajes de notificación",
-    "description": "Sistema de retroalimentación AI Infinite Dialog - Inicio automático del servicio MCP, inyección de reglas globales, panel de retroalimentación"
+    "description": "Sistema de retroalimentación AI Infinite Dialog - Inicio automático del servicio MCP, inyección de reglas globales, panel de retroalimentación",
+    "config.language.desc": "Idioma de la interfaz (auto=detección auto)"
 }

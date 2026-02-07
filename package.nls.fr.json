@@ -14,5 +14,6 @@
     "config.serverPort.desc": "Port du serveur MCP",
     "config.targetIDE.desc": "IDE cible",
     "config.showNotifications.desc": "Afficher les messages de notification",
-    "description": "Système de retour AI Infinite Dialog - Démarrage auto du service MCP, injection de règles globales, panneau de retour"
+    "description": "Système de retour AI Infinite Dialog - Démarrage auto du service MCP, injection de règles globales, panneau de retour",
+    "config.language.desc": "Langue de l'interface (auto=détection auto)"
 }

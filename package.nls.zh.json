@@ -14,5 +14,6 @@
     "config.serverPort.desc": "MCP 服务端口",
     "config.targetIDE.desc": "目标 IDE",
     "config.showNotifications.desc": "显示通知消息",
-    "description": "AI 无限对话反馈系统 - 自动启动 MCP 服务，注入全局规则，提供反馈面板"
+    "description": "AI 无限对话反馈系统 - 自动启动 MCP 服务，注入全局规则，提供反馈面板",
+    "config.language.desc": "界面语言 (auto=自动检测)"
 }

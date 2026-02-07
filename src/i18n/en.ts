@@ -134,4 +134,14 @@ export const en = {
     'mcp.userImages': 'User images count: {0}',
     'mcp.imagesAdded': 'Added {0} images to response',
     'mcp.userResponse': 'User response: {0}',
+
+    // === Language Settings ===
+    'config.language.desc': 'Interface language (auto=auto-detect)',
+    'settings.html.language': 'Language',
+    'settings.html.languageDesc': 'Select interface language (auto=auto-detect)',
+    'settings.html.language.auto': 'Auto-detect',
+    'settings.html.language.en': 'English',
+    'settings.html.language.zh': '中文',
+    'settings.html.language.fr': 'Français',
+    'settings.html.language.es': 'Español',
 };

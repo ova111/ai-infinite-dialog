@@ -134,4 +134,14 @@ export const zh = {
     'mcp.userImages': '用户图片数量: {0}',
     'mcp.imagesAdded': '已添加 {0} 张图片到响应',
     'mcp.userResponse': '用户响应: {0}',
+
+    // === Language Settings ===
+    'config.language.desc': '界面语言 (auto=自动检测)',
+    'settings.html.language': '语言',
+    'settings.html.languageDesc': '选择界面语言 (auto=自动检测)',
+    'settings.html.language.auto': '自动检测',
+    'settings.html.language.en': 'English',
+    'settings.html.language.zh': '中文',
+    'settings.html.language.fr': 'Français',
+    'settings.html.language.es': 'Español',
 };

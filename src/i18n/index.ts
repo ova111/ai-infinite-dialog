@@ -20,26 +20,46 @@ let currentLocale: string = 'en';
 let currentTranslations: Translations = en;
 
 /**
- * Initialize i18n based on VS Code's language setting.
+ * Initialize i18n based on user setting or VS Code's language setting.
  * Call this once during extension activation.
  */
 export function initI18n(): void {
-    const vscodeLang = vscode.env.language.toLowerCase();
+    const config = vscode.workspace.getConfiguration('ai-infinite-dialog');
+    const userLanguage = config.get<string>('language', 'auto');
     
-    // Try exact match first, then prefix match
-    if (locales[vscodeLang]) {
-        currentLocale = vscodeLang;
-        currentTranslations = locales[vscodeLang];
+    if (userLanguage !== 'auto' && locales[userLanguage]) {
+        // Use user's manual language selection
+        currentLocale = userLanguage;
+        currentTranslations = locales[userLanguage];
     } else {
-        const prefix = vscodeLang.split('-')[0];
-        if (locales[prefix]) {
-            currentLocale = prefix;
-            currentTranslations = locales[prefix];
+        // Auto-detect from VS Code language
+        const vscodeLang = vscode.env.language.toLowerCase();
+        
+        // Try exact match first, then prefix match
+        if (locales[vscodeLang]) {
+            currentLocale = vscodeLang;
+            currentTranslations = locales[vscodeLang];
         } else {
-            // Default to English
-            currentLocale = 'en';
-            currentTranslations = en;
+            const prefix = vscodeLang.split('-')[0];
+            if (locales[prefix]) {
+                currentLocale = prefix;
+                currentTranslations = locales[prefix];
+            } else {
+                // Default to English
+                currentLocale = 'en';
+                currentTranslations = en;
+            }
         }
+    }
+}
+
+/**
+ * Set locale manually (for runtime language changes)
+ */
+export function setLocale(locale: string): void {
+    if (locales[locale]) {
+        currentLocale = locale;
+        currentTranslations = locales[locale];
     }
 }
 

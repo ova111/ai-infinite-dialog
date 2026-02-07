@@ -108,6 +108,14 @@ export class SettingsPanel {
             if (settings.targetIDE !== undefined) {
                 await config.update('targetIDE', settings.targetIDE, vscode.ConfigurationTarget.Global);
             }
+            if (settings.language !== undefined) {
+                await config.update('language', settings.language, vscode.ConfigurationTarget.Global);
+                // Reinitialize i18n with new language setting
+                const { initI18n } = await import('./i18n');
+                initI18n();
+                // Refresh all webviews
+                vscode.commands.executeCommand('workbench.action.reloadWindow');
+            }
             
             vscode.window.showInformationMessage(t('settings.saved'));
             this._sendCurrentSettings();
@@ -125,7 +133,8 @@ export class SettingsPanel {
                 autoConfigureIDE: config.get('autoConfigureIDE', true),
                 autoInjectRules: config.get('autoInjectRules', true),
                 serverPort: config.get('serverPort', 3456),
-                targetIDE: config.get('targetIDE', 'both')
+                targetIDE: config.get('targetIDE', 'windsurf'),
+                language: config.get('language', 'auto')
             }
         });
     }
@@ -564,6 +573,21 @@ export class SettingsPanel {
             </div>
         </div>
 
+        <!-- 语言设置 -->
+        <div class="section">
+            <div class="section-title"><span>🌐</span> ${t('settings.html.language')}</div>
+            <div class="form-group">
+                <label>${t('settings.html.languageDesc')}</label>
+                <select id="language">
+                    <option value="auto">${t('settings.html.language.auto')}</option>
+                    <option value="en">${t('settings.html.language.en')}</option>
+                    <option value="zh">${t('settings.html.language.zh')}</option>
+                    <option value="fr">${t('settings.html.language.fr')}</option>
+                    <option value="es">${t('settings.html.language.es')}</option>
+                </select>
+            </div>
+        </div>
+
         <!-- 保存按钮 -->
         <div class="btn-group" style="justify-content: center; margin-top: 20px;">
             <button class="btn btn-primary" onclick="saveSettings()">
@@ -592,6 +616,7 @@ export class SettingsPanel {
                 document.getElementById('autoInjectRules').checked = s.autoInjectRules;
                 document.getElementById('serverPort').value = s.serverPort;
                 document.getElementById('targetIDE').value = s.targetIDE;
+                document.getElementById('language').value = s.language;
             }
         });
         
@@ -607,7 +632,8 @@ export class SettingsPanel {
                     autoConfigureIDE: document.getElementById('autoConfigureIDE').checked,
                     autoInjectRules: document.getElementById('autoInjectRules').checked,
                     serverPort: parseInt(document.getElementById('serverPort').value),
-                    targetIDE: document.getElementById('targetIDE').value
+                    targetIDE: document.getElementById('targetIDE').value,
+                    language: document.getElementById('language').value
                 }
             });
         }
