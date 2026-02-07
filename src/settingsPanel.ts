@@ -261,11 +261,13 @@ export class SettingsPanel {
         
         .setting-control {
             margin-left: 20px;
+            flex-shrink: 0;
         }
         
         /* Toggle Switch */
         .toggle {
             position: relative;
+            display: inline-block;
             width: 44px;
             height: 24px;
         }
