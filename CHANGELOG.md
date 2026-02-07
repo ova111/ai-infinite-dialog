@@ -6,21 +6,12 @@ All notable changes to the **AI Infinite Dialog** extension will be documented i
 
 ### Added
 - 国际化（i18n）支持：中文、英文、法文、西班牙文
-- 新增 `src/i18n/` 模块：自动检测 VS Code 语言设置
-- 新增翻译文件：`zh.ts`、`en.ts`、`fr.ts`、`es.ts`（137+ 翻译键）
-- 新增 `package.nls.json`、`package.nls.zh.json`、`package.nls.fr.json`、`package.nls.es.json` 用于命令和配置描述本地化
-- 新增多语言 README：`README.en.md`（英文）、`README.fr.md`（法文）、`README.es.md`（西班牙文）
-- README 添加语言切换链接
+- 自动检测 VS Code 语言设置
+- 手动语言切换功能（设置面板中）
+- 多语言 README 文档
 
 ### Changed
-- 所有源文件中的硬编码中文 UI 文本替换为 `t()` 国际化调用
-- `extension.ts`：所有用户消息国际化
-- `sidebarProvider.ts`：TypeScript 代码和 HTML WebView 全部国际化
-- `settingsPanel.ts`：TypeScript 代码和 HTML WebView 全部国际化
-- `feedbackPanel.ts`：TypeScript 代码和 HTML WebView 全部国际化
-- `mcpServer.ts`：工具描述、日志消息国际化
-- `ruleInjector.ts`：添加 i18n 导入
-- `package.json`：命令标题和配置描述使用 `%nls%` 本地化键
+- 所有 UI 文本国际化
 - 版本号更新至 1.0.6
 
 ## [1.0.5] - 2026-02-06
