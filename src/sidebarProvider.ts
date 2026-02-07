@@ -231,6 +231,16 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             if (settings.targetIDE !== undefined) {
                 await config.update('targetIDE', settings.targetIDE, vscode.ConfigurationTarget.Global);
             }
+            if (settings.language !== undefined) {
+                const currentLang = config.get('language', 'auto');
+                await config.update('language', settings.language, vscode.ConfigurationTarget.Global);
+                if (settings.language !== currentLang) {
+                    const { initI18n } = await import('./i18n');
+                    initI18n();
+                    vscode.commands.executeCommand('workbench.action.reloadWindow');
+                    return;
+                }
+            }
             vscode.window.showInformationMessage(t('sidebar.settings.saved'));
             this._sendCurrentSettings();
         } catch (error) {
@@ -248,7 +258,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                     autoConfigureIDE: config.get('autoConfigureIDE', true),
                     autoInjectRules: config.get('autoInjectRules', true),
                     serverPort: config.get('serverPort', 3456),
-                    targetIDE: config.get('targetIDE', 'both')
+                    targetIDE: config.get('targetIDE', 'windsurf'),
+                    language: config.get('language', 'auto')
                 }
             });
         }
@@ -491,6 +502,16 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                 <option value="windsurf">Windsurf</option>
             </select>
         </div>
+        <div class="setting-row">
+            <span class="setting-label">${t('settings.html.language')}</span>
+            <select id="language">
+                <option value="auto">${t('settings.html.language.auto')}</option>
+                <option value="en">${t('settings.html.language.en')}</option>
+                <option value="zh">${t('settings.html.language.zh')}</option>
+                <option value="fr">${t('settings.html.language.fr')}</option>
+                <option value="es">${t('settings.html.language.es')}</option>
+            </select>
+        </div>
     </div>
 
     <div class="section">
@@ -530,6 +551,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                 document.getElementById('autoInjectRules').checked = msg.settings.autoInjectRules;
                 document.getElementById('serverPort').value = msg.settings.serverPort;
                 document.getElementById('targetIDE').value = msg.settings.targetIDE;
+                if (msg.settings.language) {
+                    document.getElementById('language').value = msg.settings.language;
+                }
             }
             if (msg.command === 'statusUpdate') {
                 const dot = document.getElementById('statusDot');
@@ -560,7 +584,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                     autoConfigureIDE: document.getElementById('autoConfigureIDE').checked,
                     autoInjectRules: document.getElementById('autoInjectRules').checked,
                     serverPort: parseInt(document.getElementById('serverPort').value),
-                    targetIDE: document.getElementById('targetIDE').value
+                    targetIDE: document.getElementById('targetIDE').value,
+                    language: document.getElementById('language').value
                 }
             });
         }
