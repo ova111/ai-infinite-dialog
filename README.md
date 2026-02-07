@@ -4,6 +4,8 @@
 
 专为 **Windsurf** IDE 打造。
 
+🌐 **语言**: **中文** | [English](README.en.md) | [Français](README.fr.md) | [Español](README.es.md)
+
 ---
 
 ## 功能特性
@@ -145,7 +147,8 @@ ai-infinite-dialog/
 │   ├── sidebarProvider.ts  # 侧边栏设置面板
 │   ├── settingsPanel.ts    # 独立设置面板
 │   ├── logManager.ts       # 日志管理
-│   └── statsManager.ts     # 使用统计
+│   ├── statsManager.ts     # 使用统计
+│   └── i18n/               # 国际化 (zh, en, fr, es)
 ├── resources/
 │   └── icon.svg            # 插件图标
 ├── package.json

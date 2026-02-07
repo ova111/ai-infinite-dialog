@@ -2,6 +2,7 @@ import * as http from 'http';
 import * as vscode from 'vscode';
 import { LogManager } from './logManager';
 import { StatsManager } from './statsManager';
+import { t } from './i18n';
 
 interface FeedbackRequest {
     id: string;
@@ -59,7 +60,7 @@ export class MCPServer {
     private async tryStartOnPort(port: number, attempt: number): Promise<number> {
         return new Promise((resolve, reject) => {
             if (attempt >= this.maxPortRetries) {
-                reject(new Error(`无法找到可用端口，已尝试 ${this.port} - ${this.port + this.maxPortRetries - 1}`));
+                reject(new Error(t('mcp.portNotFound', this.port, this.port + this.maxPortRetries - 1)));
                 return;
             }
 
@@ -70,7 +71,7 @@ export class MCPServer {
             this.server.on('error', (error: NodeJS.ErrnoException) => {
                 if (error.code === 'EADDRINUSE') {
                     // 端口被占用，尝试下一个端口
-                    console.log(`端口 ${port} 被占用，尝试端口 ${port + 1}`);
+                    console.log(t('mcp.portInUse', port, port + 1));
                     this.server = null;
                     this.tryStartOnPort(port + 1, attempt + 1)
                         .then(resolve)
@@ -82,7 +83,7 @@ export class MCPServer {
 
             this.server.listen(port, '127.0.0.1', () => {
                 this.actualPort = port;
-                LogManager.getInstance().info(`HTTP 服务已启动，端口: ${port}`);
+                LogManager.getInstance().info(t('mcp.serverStarted', port));
                 resolve(port);
             });
         });
@@ -128,36 +129,36 @@ export class MCPServer {
                 tools: [
                     {
                         name: 'infinite_dialog_feedback',
-                        description: '当 AI 完成任务后调用此工具，弹出反馈面板让用户选择继续或结束对话。支持图片附件。',
+                        description: t('mcp.tool.description'),
                         inputSchema: {
                             type: 'object',
                             properties: {
                                 summary: {
                                     type: 'string',
-                                    description: 'AI 的完整回复内容，支持 Markdown 格式'
+                                    description: t('mcp.tool.summaryDesc')
                                 },
                                 images: {
                                     type: 'array',
-                                    description: '图片附件列表',
+                                    description: t('mcp.tool.imagesDesc'),
                                     items: {
                                         type: 'object',
                                         properties: {
                                             type: {
                                                 type: 'string',
                                                 enum: ['base64', 'url'],
-                                                description: '图片类型：base64 或 url'
+                                                description: t('mcp.tool.imageTypeDesc')
                                             },
                                             data: {
                                                 type: 'string',
-                                                description: '图片数据（base64编码）或图片URL'
+                                                description: t('mcp.tool.imageDataDesc')
                                             },
                                             mimeType: {
                                                 type: 'string',
-                                                description: '图片MIME类型，如 image/png, image/jpeg'
+                                                description: t('mcp.tool.imageMimeDesc')
                                             },
                                             name: {
                                                 type: 'string',
-                                                description: '图片名称'
+                                                description: t('mcp.tool.imageNameDesc')
                                             }
                                         },
                                         required: ['type', 'data']
@@ -199,10 +200,10 @@ export class MCPServer {
         const { tool, arguments: args } = data;
         const log = LogManager.getInstance();
         
-        log.request(`工具调用: ${tool}`, { args });
+        log.request(t('mcp.toolCall', tool), { args });
 
         if (tool === 'infinite_dialog_feedback') {
-            const summary = args?.summary || '任务已完成';
+            const summary = args?.summary || t('mcp.defaultSummary');
             const images: ImageData[] = args?.images || [];
             const requestId = Date.now().toString();
 
@@ -214,7 +215,7 @@ export class MCPServer {
                         this.pendingRequests.delete(requestId);
                         resolve({
                             action: 'continue',
-                            message: '用户未响应，默认继续'
+                            message: t('mcp.timeout')
                         });
                     }
                 }, 300000); // 5分钟超时
@@ -243,21 +244,21 @@ export class MCPServer {
                 const result: any = {
                     action: response.action,
                     message: response.action === 'continue' 
-                        ? (response.message || '用户选择继续，请继续执行任务')
-                        : '用户选择结束对话，请停止当前任务并总结'
+                        ? (response.message || t('mcp.userContinue'))
+                        : t('mcp.userEnd')
                 };
                 
                 // 添加用户上传的图片
-                log.info(`用户图片数量: ${response.images?.length || 0}`);
+                log.info(t('mcp.userImages', response.images?.length || 0));
                 if (response.images && response.images.length > 0) {
                     result.images = response.images;
-                    log.info(`已添加 ${response.images.length} 张图片到响应`);
+                    log.info(t('mcp.imagesAdded', response.images.length));
                 }
                 
                 // 记录统计
                 StatsManager.getInstance().recordCall(response.action as 'continue' | 'end');
                 
-                log.response(`用户响应: ${response.action}`, result);
+                log.response(t('mcp.userResponse', response.action), result);
 
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ success: true, result }));

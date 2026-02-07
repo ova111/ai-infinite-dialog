@@ -1,0 +1,18 @@
+{
+    "command.openSettings": "AI Dialog : Ouvrir les paramètres",
+    "command.startServer": "AI Dialog : Démarrer le serveur MCP",
+    "command.stopServer": "AI Dialog : Arrêter le serveur MCP",
+    "command.configureIDE": "AI Dialog : Configurer l'IDE",
+    "command.injectRules": "AI Dialog : Injecter les règles globales",
+    "command.showStatus": "AI Dialog : Afficher le statut",
+    "command.editRules": "AI Dialog : Éditer les règles",
+    "command.viewLogs": "AI Dialog : Voir les logs",
+    "view.settings": "Paramètres",
+    "config.autoStart.desc": "Démarrer automatiquement le serveur MCP à l'activation",
+    "config.autoConfigureIDE.desc": "Configurer automatiquement les paramètres MCP de l'IDE",
+    "config.autoInjectRules.desc": "Injecter automatiquement les règles globales",
+    "config.serverPort.desc": "Port du serveur MCP",
+    "config.targetIDE.desc": "IDE cible",
+    "config.showNotifications.desc": "Afficher les messages de notification",
+    "description": "Système de retour AI Infinite Dialog - Démarrage auto du service MCP, injection de règles globales, panneau de retour"
+}

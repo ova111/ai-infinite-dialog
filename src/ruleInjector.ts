@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
+import { t } from './i18n';
 
 export class RuleInjector {
     private homeDir: string;
@@ -161,7 +162,7 @@ export class RuleInjector {
         // 写入 user_global.md - 这是 Windsurf 的全局用户规则文件
         const userGlobalFile = path.join(memoriesDir, 'user_global.md');
         fs.writeFileSync(userGlobalFile, rules, 'utf-8');
-        console.log('Windsurf 全局规则已注入:', userGlobalFile);
+        console.log(t('extension.rules.injected'), userGlobalFile);
 
         // 同时写入 global_rules.md 作为备份
         const globalMemoryFile = path.join(memoriesDir, 'global_rules.md');

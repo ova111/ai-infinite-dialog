@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { t, getHtmlLang } from './i18n';
 
 export class SettingsPanel {
     private static currentPanel: SettingsPanel | undefined;
@@ -21,7 +22,7 @@ export class SettingsPanel {
 
         const panel = vscode.window.createWebviewPanel(
             SettingsPanel.viewType,
-            'AI Dialog 设置',
+            t('settings.title'),
             column || vscode.ViewColumn.One,
             {
                 enableScripts: true,
@@ -64,11 +65,11 @@ export class SettingsPanel {
                         break;
                     case 'configureIDE':
                         await vscode.commands.executeCommand('ai-infinite-dialog.configureIDE');
-                        vscode.window.showInformationMessage('IDE 配置已更新！');
+                        vscode.window.showInformationMessage(t('settings.ide.configured'));
                         break;
                     case 'injectRules':
                         await vscode.commands.executeCommand('ai-infinite-dialog.injectRules');
-                        vscode.window.showInformationMessage('全局规则已注入！');
+                        vscode.window.showInformationMessage(t('settings.rules.injected'));
                         break;
                     case 'openFile':
                         if (message.path) {
@@ -108,10 +109,10 @@ export class SettingsPanel {
                 await config.update('targetIDE', settings.targetIDE, vscode.ConfigurationTarget.Global);
             }
             
-            vscode.window.showInformationMessage('设置已保存！');
+            vscode.window.showInformationMessage(t('settings.saved'));
             this._sendCurrentSettings();
         } catch (error) {
-            vscode.window.showErrorMessage(`保存设置失败: ${error}`);
+            vscode.window.showErrorMessage(t('settings.saveFailed', String(error)));
         }
     }
 
@@ -147,11 +148,11 @@ export class SettingsPanel {
 
     private _getHtmlForWebview(): string {
         return `<!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="${getHtmlLang()}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Dialog 设置</title>
+    <title>${t('settings.html.title')}</title>
     <style>
         * {
             margin: 0;
@@ -461,45 +462,45 @@ export class SettingsPanel {
             <div class="header-icon">⚡</div>
             <div class="header-text">
                 <h1>AI Infinite Dialog</h1>
-                <p>插件设置与配置管理</p>
+                <p>${t('settings.html.subtitle')}</p>
             </div>
         </div>
 
         <!-- 快捷操作 -->
         <div class="section">
-            <div class="section-title"><span>🚀</span> 快捷操作</div>
+            <div class="section-title"><span>🚀</span> ${t('settings.html.quickActions')}</div>
             <div class="actions-section">
                 <div class="action-card" onclick="startServer()">
                     <div class="action-card-icon">▶️</div>
-                    <div class="action-card-title">启动服务</div>
-                    <div class="action-card-desc">启动 HTTP 服务器</div>
+                    <div class="action-card-title">${t('settings.html.startServer')}</div>
+                    <div class="action-card-desc">${t('settings.html.startServerDesc')}</div>
                 </div>
                 <div class="action-card" onclick="stopServer()">
                     <div class="action-card-icon">⏹️</div>
-                    <div class="action-card-title">停止服务</div>
-                    <div class="action-card-desc">停止 HTTP 服务器</div>
+                    <div class="action-card-title">${t('settings.html.stopServer')}</div>
+                    <div class="action-card-desc">${t('settings.html.stopServerDesc')}</div>
                 </div>
                 <div class="action-card" onclick="configureIDE()">
                     <div class="action-card-icon">⚙️</div>
-                    <div class="action-card-title">配置 IDE</div>
-                    <div class="action-card-desc">更新 IDE 配置</div>
+                    <div class="action-card-title">${t('settings.html.configureIDE')}</div>
+                    <div class="action-card-desc">${t('settings.html.configureIDEDesc')}</div>
                 </div>
                 <div class="action-card" onclick="injectRules()">
                     <div class="action-card-icon">📝</div>
-                    <div class="action-card-title">注入规则</div>
-                    <div class="action-card-desc">注入全局 AI 规则</div>
+                    <div class="action-card-title">${t('settings.html.injectRules')}</div>
+                    <div class="action-card-desc">${t('settings.html.injectRulesDesc')}</div>
                 </div>
             </div>
         </div>
 
         <!-- 自动化设置 -->
         <div class="section">
-            <div class="section-title"><span>🤖</span> 自动化设置</div>
+            <div class="section-title"><span>🤖</span> ${t('settings.html.automationSettings')}</div>
             
             <div class="setting-item">
                 <div class="setting-info">
-                    <div class="setting-label">自动启动服务</div>
-                    <div class="setting-desc">插件激活时自动启动 HTTP 服务</div>
+                    <div class="setting-label">${t('settings.html.autoStart')}</div>
+                    <div class="setting-desc">${t('settings.html.autoStartDesc')}</div>
                 </div>
                 <div class="setting-control">
                     <label class="toggle">
@@ -511,8 +512,8 @@ export class SettingsPanel {
             
             <div class="setting-item">
                 <div class="setting-info">
-                    <div class="setting-label">自动配置 IDE</div>
-                    <div class="setting-desc">插件激活时自动配置 IDE</div>
+                    <div class="setting-label">${t('settings.html.autoConfigureIDE')}</div>
+                    <div class="setting-desc">${t('settings.html.autoConfigureIDEDesc')}</div>
                 </div>
                 <div class="setting-control">
                     <label class="toggle">
@@ -524,8 +525,8 @@ export class SettingsPanel {
             
             <div class="setting-item">
                 <div class="setting-info">
-                    <div class="setting-label">自动注入规则</div>
-                    <div class="setting-desc">插件激活时自动注入全局 AI 规则</div>
+                    <div class="setting-label">${t('settings.html.autoInjectRules')}</div>
+                    <div class="setting-desc">${t('settings.html.autoInjectRulesDesc')}</div>
                 </div>
                 <div class="setting-control">
                     <label class="toggle">
@@ -538,12 +539,12 @@ export class SettingsPanel {
 
         <!-- 服务配置 -->
         <div class="section">
-            <div class="section-title"><span>🔧</span> 服务配置</div>
+            <div class="section-title"><span>🔧</span> ${t('settings.html.serviceConfig')}</div>
             
             <div class="setting-item">
                 <div class="setting-info">
-                    <div class="setting-label">服务端口</div>
-                    <div class="setting-desc">HTTP 服务监听的端口号（默认 3456）</div>
+                    <div class="setting-label">${t('settings.html.serverPort')}</div>
+                    <div class="setting-desc">${t('settings.html.serverPortDesc')}</div>
                 </div>
                 <div class="setting-control">
                     <input type="number" id="serverPort" min="1024" max="65535" onchange="settingChanged()">
@@ -552,8 +553,8 @@ export class SettingsPanel {
             
             <div class="setting-item">
                 <div class="setting-info">
-                    <div class="setting-label">目标 IDE</div>
-                    <div class="setting-desc">选择要配置的 IDE</div>
+                    <div class="setting-label">${t('settings.html.targetIDE')}</div>
+                    <div class="setting-desc">${t('settings.html.targetIDEDesc')}</div>
                 </div>
                 <div class="setting-control">
                     <select id="targetIDE" onchange="settingChanged()">
@@ -566,7 +567,7 @@ export class SettingsPanel {
         <!-- 保存按钮 -->
         <div class="btn-group" style="justify-content: center; margin-top: 20px;">
             <button class="btn btn-primary" onclick="saveSettings()">
-                <span>💾</span> 保存设置
+                <span>💾</span> ${t('settings.html.saveSettings')}
             </button>
         </div>
 
