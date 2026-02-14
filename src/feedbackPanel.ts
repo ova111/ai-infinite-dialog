@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { FeedbackResponse, FeedbackRequestData, ImageData } from './mcpServer';
+import { t, getHtmlLang } from './i18n';
 
 export class FeedbackPanel {
     private static panels: Map<string, FeedbackPanel> = new Map();
@@ -33,7 +34,7 @@ export class FeedbackPanel {
 
         const panel = vscode.window.createWebviewPanel(
             FeedbackPanel.viewType,
-            'AI 反馈',
+            t('feedback.title'),
             column || vscode.ViewColumn.Beside,
             {
                 enableScripts: true,
@@ -77,7 +78,7 @@ export class FeedbackPanel {
                         if (this._responseCallback) {
                             this._responseCallback({
                                 action: 'continue',
-                                message: message.text || '用户选择继续',
+                                message: message.text || t('feedback.continue.default'),
                                 images: message.images || []
                             });
                         }
@@ -89,7 +90,7 @@ export class FeedbackPanel {
                         if (this._responseCallback) {
                             this._responseCallback({
                                 action: 'end',
-                                message: '用户选择结束对话'
+                                message: t('feedback.end.default')
                             });
                         }
                         this._panel.dispose();
@@ -126,7 +127,7 @@ export class FeedbackPanel {
 
     private _update(data: FeedbackRequestData) {
         const webview = this._panel.webview;
-        this._panel.title = 'AI 反馈';
+        this._panel.title = t('feedback.title');
         this._panel.webview.html = this._getHtmlForWebview(webview, data);
     }
 
@@ -140,11 +141,11 @@ export class FeedbackPanel {
         const imagesJson = JSON.stringify(images || []);
 
         return `<!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="${getHtmlLang()}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 反馈</title>
+    <title>${t('feedback.title')}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/11.1.1/marked.min.js"></script>
@@ -500,33 +501,33 @@ export class FeedbackPanel {
 <body>
     <div class="container">
         <div class="header">
-            <div class="header-title">任务反馈</div>
-            <div class="header-hint">Ctrl+Enter 继续 | Esc 结束</div>
+            <div class="header-title">${t('feedback.html.title')}</div>
+            <div class="header-hint">${t('feedback.html.hint')}</div>
         </div>
         
         <div class="content" id="content"></div>
         
         <div id="receivedImages" class="images-section" style="display: none;">
-            <h4>附带图片</h4>
+            <h4>${t('feedback.html.attachedImages')}</h4>
             <div class="images-grid" id="receivedImagesGrid"></div>
         </div>
         
         <div class="input-section">
-            <label>追加指令（可选）</label>
-            <textarea id="userInput" placeholder="输入后按 Ctrl+Enter 继续..."></textarea>
+            <label>${t('feedback.html.additionalInstructions')}</label>
+            <textarea id="userInput" placeholder="${t('feedback.html.inputPlaceholder')}"></textarea>
         </div>
         
         <div class="images-section">
             <div class="upload-area" id="uploadArea">
-                <div class="upload-text">点击上传图片 或 Ctrl+V 粘贴</div>
+                <div class="upload-text">${t('feedback.html.uploadText')}</div>
                 <input type="file" id="fileInput" accept="image/*" multiple>
             </div>
             <div class="images-grid" id="uploadedImagesGrid"></div>
         </div>
         
         <div class="actions">
-            <button class="btn btn-end" onclick="handleEnd()">结束</button>
-            <button class="btn btn-continue" onclick="handleContinue()">继续</button>
+            <button class="btn btn-end" onclick="handleEnd()">${t('feedback.html.endBtn')}</button>
+            <button class="btn btn-continue" onclick="handleContinue()">${t('feedback.html.continueBtn')}</button>
         </div>
     </div>
     
@@ -603,11 +604,11 @@ export class FeedbackPanel {
             const pre = block.parentElement;
             const btn = document.createElement('button');
             btn.className = 'copy-btn';
-            btn.textContent = '复制';
+            btn.textContent = '${t('feedback.html.copy')}';
             btn.onclick = () => {
                 navigator.clipboard.writeText(block.textContent);
-                btn.textContent = '已复制!';
-                setTimeout(() => btn.textContent = '复制', 2000);
+                btn.textContent = '${t('feedback.html.copied')}';
+                setTimeout(() => btn.textContent = '${t('feedback.html.copy')}', 2000);
             };
             pre.appendChild(btn);
         });

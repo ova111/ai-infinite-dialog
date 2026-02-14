@@ -1,0 +1,19 @@
+{
+    "command.openSettings": "AI Dialog: Abrir configuración",
+    "command.startServer": "AI Dialog: Iniciar servidor MCP",
+    "command.stopServer": "AI Dialog: Detener servidor MCP",
+    "command.configureIDE": "AI Dialog: Configurar IDE",
+    "command.injectRules": "AI Dialog: Inyectar reglas globales",
+    "command.showStatus": "AI Dialog: Mostrar estado",
+    "command.editRules": "AI Dialog: Editar reglas",
+    "command.viewLogs": "AI Dialog: Ver logs",
+    "view.settings": "Configuración",
+    "config.autoStart.desc": "Iniciar automáticamente el servidor MCP al activar la extensión",
+    "config.autoConfigureIDE.desc": "Configurar automáticamente los ajustes MCP del IDE",
+    "config.autoInjectRules.desc": "Inyectar automáticamente las reglas globales",
+    "config.serverPort.desc": "Puerto del servidor MCP",
+    "config.targetIDE.desc": "IDE destino",
+    "config.showNotifications.desc": "Mostrar mensajes de notificación",
+    "description": "Sistema de retroalimentación AI Infinite Dialog - Inicio automático del servicio MCP, inyección de reglas globales, panel de retroalimentación",
+    "config.language.desc": "Idioma de la interfaz (auto=detección auto)"
+}

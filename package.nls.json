@@ -1,0 +1,19 @@
+{
+    "command.openSettings": "AI Dialog: Open Settings Panel",
+    "command.startServer": "AI Dialog: Start MCP Server",
+    "command.stopServer": "AI Dialog: Stop MCP Server",
+    "command.configureIDE": "AI Dialog: Configure IDE",
+    "command.injectRules": "AI Dialog: Inject Global Rules",
+    "command.showStatus": "AI Dialog: Show Status",
+    "command.editRules": "AI Dialog: Edit Rules",
+    "command.viewLogs": "AI Dialog: View Logs",
+    "view.settings": "Settings",
+    "config.autoStart.desc": "Automatically start MCP server on extension activation",
+    "config.autoConfigureIDE.desc": "Automatically configure IDE MCP settings",
+    "config.autoInjectRules.desc": "Automatically inject global rules",
+    "config.serverPort.desc": "MCP server port",
+    "config.targetIDE.desc": "Target IDE",
+    "config.showNotifications.desc": "Show notification messages",
+    "description": "AI Infinite Dialog Feedback System - Auto-start MCP service, inject global rules, provide feedback panel",
+    "config.language.desc": "Interface language (auto=auto-detect)"
+}

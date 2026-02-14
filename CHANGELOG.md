@@ -2,6 +2,18 @@
 
 All notable changes to the **AI Infinite Dialog** extension will be documented in this file.
 
+## [1.0.6] - 2026-02-07
+
+### Added
+- 国际化（i18n）支持：中文、英文、法文、西班牙文
+- 自动检测 VS Code 语言设置
+- 手动语言切换功能（设置面板中）
+- 多语言 README 文档
+
+### Changed
+- 所有 UI 文本国际化
+- 版本号更新至 1.0.6
+
 ## [1.0.5] - 2026-02-06
 
 ### Changed

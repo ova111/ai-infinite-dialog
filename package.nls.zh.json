@@ -1,0 +1,19 @@
+{
+    "command.openSettings": "AI Dialog: 打开设置面板",
+    "command.startServer": "AI Dialog: 启动 MCP 服务",
+    "command.stopServer": "AI Dialog: 停止 MCP 服务",
+    "command.configureIDE": "AI Dialog: 配置 IDE",
+    "command.injectRules": "AI Dialog: 注入全局规则",
+    "command.showStatus": "AI Dialog: 查看状态",
+    "command.editRules": "AI Dialog: 编辑规则",
+    "command.viewLogs": "AI Dialog: 查看日志",
+    "view.settings": "设置",
+    "config.autoStart.desc": "插件启动时自动启动 MCP 服务",
+    "config.autoConfigureIDE.desc": "自动配置 IDE 的 MCP 设置",
+    "config.autoInjectRules.desc": "自动注入全局规则",
+    "config.serverPort.desc": "MCP 服务端口",
+    "config.targetIDE.desc": "目标 IDE",
+    "config.showNotifications.desc": "显示通知消息",
+    "description": "AI 无限对话反馈系统 - 自动启动 MCP 服务，注入全局规则，提供反馈面板",
+    "config.language.desc": "界面语言 (auto=自动检测)"
+}

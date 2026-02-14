@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as http from 'http';
 import { StatsManager } from './statsManager';
+import { t, getHtmlLang } from './i18n';
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'ai-dialog.settingsView';
@@ -31,7 +32,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         if (uri) {
             const fs = require('fs');
             fs.writeFileSync(uri.fsPath, JSON.stringify(exportData, null, 2));
-            vscode.window.showInformationMessage('配置已导出');
+            vscode.window.showInformationMessage(t('sidebar.config.exported'));
         }
     }
 
@@ -52,11 +53,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                     for (const [key, value] of Object.entries(data.settings)) {
                         await config.update(key, value, vscode.ConfigurationTarget.Global);
                     }
-                    vscode.window.showInformationMessage('配置已导入');
+                    vscode.window.showInformationMessage(t('sidebar.config.imported'));
                     this._sendCurrentSettings();
                 }
             } catch (error) {
-                vscode.window.showErrorMessage('导入失败: 无效的配置文件');
+                vscode.window.showErrorMessage(t('sidebar.config.importFailed'));
             }
         }
     }
@@ -102,11 +103,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                     break;
                 case 'configureIDE':
                     await vscode.commands.executeCommand('ai-infinite-dialog.configureIDE');
-                    vscode.window.showInformationMessage('IDE 配置已更新！');
+                    vscode.window.showInformationMessage(t('sidebar.ide.configured'));
                     break;
                 case 'injectRules':
                     await vscode.commands.executeCommand('ai-infinite-dialog.injectRules');
-                    vscode.window.showInformationMessage('全局规则已注入！');
+                    vscode.window.showInformationMessage(t('sidebar.rules.injected'));
                     break;
                 case 'editRules':
                     await vscode.commands.executeCommand('ai-infinite-dialog.editRules');
@@ -126,7 +127,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                 case 'resetStats':
                     StatsManager.getInstance().resetStats();
                     this._sendStats();
-                    vscode.window.showInformationMessage('统计数据已重置');
+                    vscode.window.showInformationMessage(t('sidebar.stats.reset'));
                     break;
             }
         });
@@ -230,10 +231,20 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             if (settings.targetIDE !== undefined) {
                 await config.update('targetIDE', settings.targetIDE, vscode.ConfigurationTarget.Global);
             }
-            vscode.window.showInformationMessage('设置已保存！');
+            if (settings.language !== undefined) {
+                const currentLang = config.get('language', 'auto');
+                await config.update('language', settings.language, vscode.ConfigurationTarget.Global);
+                if (settings.language !== currentLang) {
+                    const { initI18n } = await import('./i18n');
+                    initI18n();
+                    vscode.commands.executeCommand('workbench.action.reloadWindow');
+                    return;
+                }
+            }
+            vscode.window.showInformationMessage(t('sidebar.settings.saved'));
             this._sendCurrentSettings();
         } catch (error) {
-            vscode.window.showErrorMessage(`保存设置失败: ${error}`);
+            vscode.window.showErrorMessage(t('sidebar.settings.saveFailed', String(error)));
         }
     }
 
@@ -247,7 +258,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                     autoConfigureIDE: config.get('autoConfigureIDE', true),
                     autoInjectRules: config.get('autoInjectRules', true),
                     serverPort: config.get('serverPort', 3456),
-                    targetIDE: config.get('targetIDE', 'both')
+                    targetIDE: config.get('targetIDE', 'windsurf'),
+                    language: config.get('language', 'auto')
                 }
             });
         }
@@ -255,11 +267,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
     private _getHtmlForWebview(webview: vscode.Webview): string {
         return `<!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="${getHtmlLang()}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>设置</title>
+    <title>${t('sidebar.html.title')}</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -425,53 +437,53 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 </head>
 <body>
     <div class="section">
-        <div class="section-title">状态</div>
+        <div class="section-title">${t('sidebar.html.status')}</div>
         <div class="status-card">
             <div class="status-info">
                 <div class="status-dot" id="statusDot"></div>
-                <span class="status-text" id="statusText">检测中...</span>
+                <span class="status-text" id="statusText">${t('sidebar.html.detecting')}</span>
             </div>
             <span class="status-port" id="statusPort"></span>
         </div>
         <div class="btn-row three">
-            <button class="btn primary" onclick="startServer()">启动</button>
-            <button class="btn" onclick="stopServer()">停止</button>
-            <button class="btn" onclick="restartServer()">重启</button>
+            <button class="btn primary" onclick="startServer()">${t('sidebar.html.start')}</button>
+            <button class="btn" onclick="stopServer()">${t('sidebar.html.stop')}</button>
+            <button class="btn" onclick="restartServer()">${t('sidebar.html.restart')}</button>
         </div>
     </div>
 
     <div class="section">
-        <div class="section-title">工具</div>
+        <div class="section-title">${t('sidebar.html.tools')}</div>
         <div class="btn-row">
-            <button class="btn" onclick="configureIDE()">配置 IDE</button>
-            <button class="btn" onclick="injectRules()">注入规则</button>
+            <button class="btn" onclick="configureIDE()">${t('sidebar.html.configureIDE')}</button>
+            <button class="btn" onclick="injectRules()">${t('sidebar.html.injectRules')}</button>
         </div>
         <div class="btn-row">
-            <button class="btn" onclick="editRules()">编辑规则</button>
-            <button class="btn" onclick="viewLogs()">查看日志</button>
+            <button class="btn" onclick="editRules()">${t('sidebar.html.editRules')}</button>
+            <button class="btn" onclick="viewLogs()">${t('sidebar.html.viewLogs')}</button>
         </div>
         <div class="btn-row">
-            <button class="btn" onclick="exportConfig()">导出配置</button>
-            <button class="btn" onclick="importConfig()">导入配置</button>
+            <button class="btn" onclick="exportConfig()">${t('sidebar.html.exportConfig')}</button>
+            <button class="btn" onclick="importConfig()">${t('sidebar.html.importConfig')}</button>
         </div>
     </div>
 
     <div class="section">
-        <div class="section-title">自动化</div>
+        <div class="section-title">${t('sidebar.html.automation')}</div>
         <div class="setting-row">
-            <span class="setting-label">启动时运行服务</span>
+            <span class="setting-label">${t('sidebar.html.autoStartService')}</span>
             <div class="checkbox-wrap">
                 <input type="checkbox" id="autoStart">
             </div>
         </div>
         <div class="setting-row">
-            <span class="setting-label">自动配置 IDE</span>
+            <span class="setting-label">${t('sidebar.html.autoConfigureIDE')}</span>
             <div class="checkbox-wrap">
                 <input type="checkbox" id="autoConfigureIDE">
             </div>
         </div>
         <div class="setting-row">
-            <span class="setting-label">自动注入规则</span>
+            <span class="setting-label">${t('sidebar.html.autoInjectRules')}</span>
             <div class="checkbox-wrap">
                 <input type="checkbox" id="autoInjectRules">
             </div>
@@ -479,40 +491,50 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     </div>
 
     <div class="section">
-        <div class="section-title">配置</div>
+        <div class="section-title">${t('sidebar.html.configuration')}</div>
         <div class="setting-row">
-            <span class="setting-label">端口</span>
+            <span class="setting-label">${t('sidebar.html.port')}</span>
             <input type="number" id="serverPort" min="1024" max="65535">
         </div>
         <div class="setting-row">
-            <span class="setting-label">目标</span>
+            <span class="setting-label">${t('sidebar.html.target')}</span>
             <select id="targetIDE">
                 <option value="windsurf">Windsurf</option>
+            </select>
+        </div>
+        <div class="setting-row">
+            <span class="setting-label">${t('settings.html.language')}</span>
+            <select id="language">
+                <option value="auto">${t('settings.html.language.auto')}</option>
+                <option value="en">${t('settings.html.language.en')}</option>
+                <option value="zh">${t('settings.html.language.zh')}</option>
+                <option value="fr">${t('settings.html.language.fr')}</option>
+                <option value="es">${t('settings.html.language.es')}</option>
             </select>
         </div>
     </div>
 
     <div class="section">
-        <div class="section-title">统计</div>
+        <div class="section-title">${t('sidebar.html.statistics')}</div>
         <div class="stats-grid">
             <div class="stat-item">
                 <span class="stat-value" id="totalCalls">0</span>
-                <span class="stat-label">总调用</span>
+                <span class="stat-label">${t('sidebar.html.totalCalls')}</span>
             </div>
             <div class="stat-item">
                 <span class="stat-value" id="continueCount">0</span>
-                <span class="stat-label">继续</span>
+                <span class="stat-label">${t('sidebar.html.continue')}</span>
             </div>
             <div class="stat-item">
                 <span class="stat-value" id="endCount">0</span>
-                <span class="stat-label">结束</span>
+                <span class="stat-label">${t('sidebar.html.end')}</span>
             </div>
         </div>
-        <button class="btn" style="width:100%;margin-top:8px;" onclick="resetStats()">重置统计</button>
+        <button class="btn" style="width:100%;margin-top:8px;" onclick="resetStats()">${t('sidebar.html.resetStats')}</button>
     </div>
 
     <div class="save-section">
-        <button class="save-btn" onclick="saveSettings()">保存</button>
+        <button class="save-btn" onclick="saveSettings()">${t('sidebar.html.save')}</button>
     </div>
 
     <script>
@@ -529,6 +551,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                 document.getElementById('autoInjectRules').checked = msg.settings.autoInjectRules;
                 document.getElementById('serverPort').value = msg.settings.serverPort;
                 document.getElementById('targetIDE').value = msg.settings.targetIDE;
+                if (msg.settings.language) {
+                    document.getElementById('language').value = msg.settings.language;
+                }
             }
             if (msg.command === 'statusUpdate') {
                 const dot = document.getElementById('statusDot');
@@ -536,11 +561,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                 const port = document.getElementById('statusPort');
                 if (msg.status.running) {
                     dot.classList.add('running');
-                    text.textContent = '运行中';
+                    text.textContent = '${t('sidebar.html.running')}';
                     port.textContent = ':' + msg.status.port;
                 } else {
                     dot.classList.remove('running');
-                    text.textContent = '已停止';
+                    text.textContent = '${t('sidebar.html.stopped')}';
                     port.textContent = '';
                 }
             }
@@ -559,7 +584,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                     autoConfigureIDE: document.getElementById('autoConfigureIDE').checked,
                     autoInjectRules: document.getElementById('autoInjectRules').checked,
                     serverPort: parseInt(document.getElementById('serverPort').value),
-                    targetIDE: document.getElementById('targetIDE').value
+                    targetIDE: document.getElementById('targetIDE').value,
+                    language: document.getElementById('language').value
                 }
             });
         }

@@ -9,17 +9,21 @@ import { SettingsPanel } from './settingsPanel';
 import { SidebarProvider } from './sidebarProvider';
 import { LogManager } from './logManager';
 import { StatsManager } from './statsManager';
+import { initI18n, t } from './i18n';
 
 let mcpServer: MCPServer | null = null;
 let statusBarItem: vscode.StatusBarItem;
 
 export async function activate(context: vscode.ExtensionContext) {
-    console.log('AI Infinite Dialog 插件正在激活...');
+    // Initialize i18n before anything else
+    initI18n();
+    
+    console.log(t('extension.activating'));
 
     // 创建状态栏项 - 点击打开设置面板
     statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
     statusBarItem.text = '$(sync~spin) AI Dialog';
-    statusBarItem.tooltip = '点击打开 AI Dialog 设置面板';
+    statusBarItem.tooltip = t('extension.statusBar.tooltip');
     statusBarItem.command = 'ai-infinite-dialog.openSettings';
     context.subscriptions.push(statusBarItem);
     statusBarItem.show();
@@ -59,14 +63,14 @@ export async function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('ai-infinite-dialog.configureIDE', async () => {
             await configManager.configureIDE();
-            vscode.window.showInformationMessage('IDE 配置已更新！');
+            vscode.window.showInformationMessage(t('extension.ide.configured'));
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('ai-infinite-dialog.injectRules', async () => {
             await ruleInjector.injectRules();
-            vscode.window.showInformationMessage('全局规则已注入！');
+            vscode.window.showInformationMessage(t('extension.rules.injected'));
         })
     );
 
@@ -86,7 +90,7 @@ export async function activate(context: vscode.ExtensionContext) {
                 const doc = await vscode.workspace.openTextDocument(rulesPath);
                 await vscode.window.showTextDocument(doc);
             } catch (error) {
-                vscode.window.showErrorMessage(`无法打开规则文件: ${rulesPath}`);
+                vscode.window.showErrorMessage(t('extension.rules.openFailed', rulesPath));
             }
         })
     );
@@ -117,12 +121,12 @@ export async function activate(context: vscode.ExtensionContext) {
         await ruleInjector.injectRules();
     }
 
-    vscode.window.showInformationMessage('AI Infinite Dialog 插件已激活！');
+    vscode.window.showInformationMessage(t('extension.activated'));
 }
 
 async function startServer(context: vscode.ExtensionContext, configManager?: ConfigManager) {
     if (mcpServer) {
-        vscode.window.showWarningMessage('HTTP 服务已在运行中');
+        vscode.window.showWarningMessage(t('extension.server.alreadyRunning'));
         return;
     }
 
@@ -133,10 +137,10 @@ async function startServer(context: vscode.ExtensionContext, configManager?: Con
     const existingPort = await checkExistingServer(port);
     if (existingPort) {
         // 已有服务运行，直接复用
-        statusBarItem.text = `$(check) AI Dialog :${existingPort} (共享)`;
+        statusBarItem.text = `$(check) AI Dialog :${existingPort} ${t('extension.statusBar.shared')}`;
         statusBarItem.backgroundColor = undefined;
         statusBarItem.show();
-        vscode.window.showInformationMessage(`检测到已有 AI Dialog 服务运行在端口 ${existingPort}，将复用该服务`);
+        vscode.window.showInformationMessage(t('extension.server.reuseDetected', existingPort));
         return;
     }
 
@@ -159,18 +163,18 @@ async function startServer(context: vscode.ExtensionContext, configManager?: Con
         // 如果端口发生变化，自动更新 IDE 配置
         if (actualPort !== port && configManager) {
             await configManager.configureIDEWithPort(actualPort);
-            vscode.window.showInformationMessage(`HTTP 服务已启动，端口 ${port} 被占用，使用端口: ${actualPort}，已自动更新配置`);
+            vscode.window.showInformationMessage(t('extension.server.startedPortChanged', port, actualPort));
         } else if (actualPort !== port) {
-            vscode.window.showInformationMessage(`HTTP 服务已启动，端口 ${port} 被占用，使用端口: ${actualPort}`);
+            vscode.window.showInformationMessage(t('extension.server.startedPortChangedNoConfig', port, actualPort));
         } else {
-            vscode.window.showInformationMessage(`HTTP 服务已启动，端口: ${actualPort}`);
+            vscode.window.showInformationMessage(t('extension.server.started', actualPort));
         }
     } catch (error) {
         mcpServer = null;
         statusBarItem.text = '$(error) AI Dialog';
         statusBarItem.backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground');
         statusBarItem.show();
-        vscode.window.showErrorMessage(`HTTP 服务启动失败: ${error}`);
+        vscode.window.showErrorMessage(t('extension.server.startFailed', String(error)));
     }
 }
 
@@ -217,7 +221,7 @@ async function checkExistingServer(basePort: number): Promise<number | null> {
 
 async function stopServer() {
     if (!mcpServer) {
-        vscode.window.showWarningMessage('HTTP 服务未运行');
+        vscode.window.showWarningMessage(t('extension.server.notRunning'));
         return;
     }
 
@@ -225,7 +229,7 @@ async function stopServer() {
     mcpServer = null;
     statusBarItem.text = '$(circle-slash) AI Dialog';
     statusBarItem.show();
-    vscode.window.showInformationMessage('HTTP 服务已停止');
+    vscode.window.showInformationMessage(t('extension.server.stopped'));
 }
 
 function showStatus() {
@@ -234,23 +238,30 @@ function showStatus() {
     const running = mcpServer !== null;
     const actualPort = mcpServer ? mcpServer.getActualPort() : configPort;
 
+    const statusLabel = running ? t('extension.status.running') : t('extension.status.stopped');
+    const portInfo = actualPort !== configPort ? ` (${t('extension.status.configured')}: ${configPort})` : '';
+    const startLabel = t('extension.status.action.start');
+    const stopLabel = t('extension.status.action.stop');
+    const configLabel = t('extension.status.action.configureIDE');
+    const rulesLabel = t('extension.status.action.injectRules');
+
     vscode.window.showInformationMessage(
-        `AI Infinite Dialog 状态:\n` +
-        `- 服务状态: ${running ? '运行中' : '已停止'}\n` +
-        `- 端口: ${actualPort}${actualPort !== configPort ? ` (配置: ${configPort})` : ''}`,
-        '启动服务', '停止服务', '配置 IDE', '注入规则'
+        `AI Infinite Dialog:\n` +
+        `- ${t('extension.status.service')}: ${statusLabel}\n` +
+        `- ${t('extension.status.port')}: ${actualPort}${portInfo}`,
+        startLabel, stopLabel, configLabel, rulesLabel
     ).then(selection => {
         switch (selection) {
-            case '启动服务':
+            case startLabel:
                 vscode.commands.executeCommand('ai-infinite-dialog.startServer');
                 break;
-            case '停止服务':
+            case stopLabel:
                 vscode.commands.executeCommand('ai-infinite-dialog.stopServer');
                 break;
-            case '配置 IDE':
+            case configLabel:
                 vscode.commands.executeCommand('ai-infinite-dialog.configureIDE');
                 break;
-            case '注入规则':
+            case rulesLabel:
                 vscode.commands.executeCommand('ai-infinite-dialog.injectRules');
                 break;
         }
