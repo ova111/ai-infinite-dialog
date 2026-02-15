@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as http from 'http';
 import { StatsManager } from './statsManager';
+import { SkillManager } from './skillManager';
 import { t, getHtmlLang } from './i18n';
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
@@ -129,6 +130,51 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                     this._sendStats();
                     vscode.window.showInformationMessage(t('sidebar.stats.reset'));
                     break;
+                case 'getSkills':
+                    this._sendSkills();
+                    break;
+                case 'toggleSkill':
+                    if (message.skillId) {
+                        const sm = SkillManager.getInstance();
+                        if (sm) {
+                            await sm.toggleSkill(message.skillId);
+                            this._sendSkills();
+                            // 自动重新注入规则
+                            await vscode.commands.executeCommand('ai-infinite-dialog.injectRules');
+                        }
+                    }
+                    break;
+                case 'importSkill':
+                    {
+                        const sm = SkillManager.getInstance();
+                        if (sm) {
+                            await sm.importSkill();
+                            this._sendSkills();
+                        }
+                    }
+                    break;
+                case 'deleteSkill':
+                    if (message.skillId) {
+                        const sm = SkillManager.getInstance();
+                        if (sm) {
+                            const ok = await sm.deleteSkill(message.skillId);
+                            if (ok) {
+                                this._sendSkills();
+                                await vscode.commands.executeCommand('ai-infinite-dialog.injectRules');
+                            }
+                        }
+                    }
+                    break;
+                case 'editSkill':
+                    if (message.filePath) {
+                        try {
+                            const doc = await vscode.workspace.openTextDocument(message.filePath);
+                            await vscode.window.showTextDocument(doc);
+                        } catch (e) {
+                            vscode.window.showErrorMessage('Cannot open skill file');
+                        }
+                    }
+                    break;
             }
         });
 
@@ -137,6 +183,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             this._sendCurrentSettings();
             this._sendStatus();
             this._sendStats();
+            this._sendSkills();
         }, 100);
 
         // 定期检查状态
@@ -159,6 +206,18 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                 command: 'statsUpdate',
                 stats: stats
             });
+        }
+    }
+
+    private _sendSkills() {
+        if (this._view) {
+            const sm = SkillManager.getInstance();
+            if (sm) {
+                this._view.webview.postMessage({
+                    command: 'skillsUpdate',
+                    skills: sm.getAllSkills()
+                });
+            }
         }
     }
 
@@ -394,6 +453,81 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         select { width: 90px; }
         input[type="number"] { width: 60px; text-align: center; }
         
+        .skill-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 8px;
+            border: 1px solid var(--vscode-panel-border);
+            border-radius: 2px;
+            margin-bottom: 4px;
+            background: var(--vscode-editor-background);
+        }
+        .skill-item:hover {
+            background: var(--vscode-list-hoverBackground);
+        }
+        .skill-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            min-width: 0;
+        }
+        .skill-left input[type="checkbox"] {
+            width: 14px;
+            height: 14px;
+            accent-color: var(--vscode-button-background);
+            flex-shrink: 0;
+        }
+        .skill-info {
+            min-width: 0;
+        }
+        .skill-name {
+            font-size: 12px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .skill-desc {
+            font-size: 10px;
+            color: var(--vscode-descriptionForeground);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .skill-actions {
+            display: flex;
+            gap: 2px;
+            flex-shrink: 0;
+        }
+        .skill-actions button {
+            background: none;
+            border: none;
+            color: var(--vscode-descriptionForeground);
+            cursor: pointer;
+            padding: 2px 4px;
+            font-size: 11px;
+            border-radius: 2px;
+        }
+        .skill-actions button:hover {
+            background: var(--vscode-toolbar-hoverBackground);
+            color: var(--vscode-foreground);
+        }
+        .skill-badge {
+            font-size: 9px;
+            padding: 1px 4px;
+            border-radius: 2px;
+            background: var(--vscode-badge-background);
+            color: var(--vscode-badge-foreground);
+        }
+        .skills-empty {
+            font-size: 11px;
+            color: var(--vscode-descriptionForeground);
+            text-align: center;
+            padding: 8px;
+        }
+        
         .save-section {
             padding: 12px;
         }
@@ -465,6 +599,14 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         <div class="btn-row">
             <button class="btn" onclick="exportConfig()">${t('sidebar.html.exportConfig')}</button>
             <button class="btn" onclick="importConfig()">${t('sidebar.html.importConfig')}</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">SKILLS</div>
+        <div id="skillsList"></div>
+        <div class="btn-row" style="margin-top:6px;">
+            <button class="btn" onclick="importSkill()">Import</button>
         </div>
     </div>
 
@@ -542,6 +684,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         vscode.postMessage({ command: 'getSettings' });
         vscode.postMessage({ command: 'getStatus' });
         vscode.postMessage({ command: 'getStats' });
+        vscode.postMessage({ command: 'getSkills' });
         
         window.addEventListener('message', event => {
             const msg = event.data;
@@ -574,6 +717,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                 document.getElementById('continueCount').textContent = msg.stats.continueCount;
                 document.getElementById('endCount').textContent = msg.stats.endCount;
             }
+            if (msg.command === 'skillsUpdate') {
+                renderSkills(msg.skills);
+            }
         });
         
         function saveSettings() {
@@ -599,6 +745,35 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         function exportConfig() { vscode.postMessage({ command: 'exportConfig' }); }
         function importConfig() { vscode.postMessage({ command: 'importConfig' }); }
         function resetStats() { vscode.postMessage({ command: 'resetStats' }); }
+        function importSkill() { vscode.postMessage({ command: 'importSkill' }); }
+        function toggleSkill(skillId) { vscode.postMessage({ command: 'toggleSkill', skillId }); }
+        function deleteSkill(skillId) { vscode.postMessage({ command: 'deleteSkill', skillId }); }
+        function editSkill(filePath) { vscode.postMessage({ command: 'editSkill', filePath }); }
+        
+        function renderSkills(skills) {
+            const container = document.getElementById('skillsList');
+            if (!skills || skills.length === 0) {
+                container.innerHTML = '<div class="skills-empty">No skills available</div>';
+                return;
+            }
+            container.innerHTML = skills.map(s => {
+                const badge = s.isBuiltin ? '<span class="skill-badge">builtin</span>' : '';
+                const deleteBtn = s.isBuiltin ? '' : '<button onclick="deleteSkill(\\''+s.id+'\\')">Del</button>';
+                return '<div class="skill-item">' +
+                    '<div class="skill-left">' +
+                        '<input type="checkbox" ' + (s.active ? 'checked' : '') + ' onchange="toggleSkill(\\''+s.id+'\\')">' +
+                        '<div class="skill-info">' +
+                            '<div class="skill-name">' + s.name + ' ' + badge + '</div>' +
+                            '<div class="skill-desc">' + s.description + '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="skill-actions">' +
+                        '<button onclick="editSkill(\\''+s.filePath.replace(/\\\\/g, '\\\\\\\\').replace(/'/g, "\\\\'")+'\\')">Edit</button>' +
+                        deleteBtn +
+                    '</div>' +
+                '</div>';
+            }).join('');
+        }
     </script>
 </body>
 </html>`;

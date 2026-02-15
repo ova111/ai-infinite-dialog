@@ -1,4 +1,7 @@
 import * as http from 'http';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as os from 'os';
 import * as vscode from 'vscode';
 import { LogManager } from './logManager';
 import { StatsManager } from './statsManager';
@@ -248,11 +251,13 @@ export class MCPServer {
                         : t('mcp.userEnd')
                 };
                 
-                // 添加用户上传的图片
+                // 将用户上传的图片保存为临时文件，返回路径供 AI 用 read_file 查看
                 log.info(t('mcp.userImages', response.images?.length || 0));
                 if (response.images && response.images.length > 0) {
-                    result.images = response.images;
-                    log.info(t('mcp.imagesAdded', response.images.length));
+                    const imagePaths = this.saveImagesToTempFiles(response.images);
+                    result.image_paths = imagePaths;
+                    result.image_hint = 'User uploaded images. Use read_file tool to view each image path listed above.';
+                    log.info(t('mcp.imagesAdded', imagePaths.length));
                 }
                 
                 // 记录统计
@@ -275,6 +280,42 @@ export class MCPServer {
             const request = this.pendingRequests.get(requestId)!;
             request.resolve(response);
         }
+    }
+
+    /**
+     * 将 base64 图片保存为临时文件，返回文件路径数组
+     * AI 可以通过 read_file 工具查看这些图片
+     */
+    private saveImagesToTempFiles(images: ImageData[]): string[] {
+        const tmpDir = path.join(os.tmpdir(), 'ai-dialog-images');
+        if (!fs.existsSync(tmpDir)) {
+            fs.mkdirSync(tmpDir, { recursive: true });
+        }
+
+        const paths: string[] = [];
+        for (const img of images) {
+            if (img.type === 'base64' && img.data) {
+                const ext = this.mimeToExt(img.mimeType || 'image/png');
+                const fileName = `img_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+                const filePath = path.join(tmpDir, fileName);
+                fs.writeFileSync(filePath, Buffer.from(img.data, 'base64'));
+                paths.push(filePath);
+            }
+        }
+        return paths;
+    }
+
+    private mimeToExt(mimeType: string): string {
+        const map: Record<string, string> = {
+            'image/png': 'png',
+            'image/jpeg': 'jpg',
+            'image/gif': 'gif',
+            'image/webp': 'webp',
+            'image/svg+xml': 'svg',
+            'image/bmp': 'bmp',
+            'image/tiff': 'tiff'
+        };
+        return map[mimeType] || 'png';
     }
 
 }

@@ -9,6 +9,7 @@ import { SettingsPanel } from './settingsPanel';
 import { SidebarProvider } from './sidebarProvider';
 import { LogManager } from './logManager';
 import { StatsManager } from './statsManager';
+import { SkillManager } from './skillManager';
 import { initI18n, t } from './i18n';
 
 let mcpServer: MCPServer | null = null;
@@ -34,6 +35,9 @@ export async function activate(context: vscode.ExtensionContext) {
     
     // 初始化统计管理器
     StatsManager.getInstance().initialize(context);
+
+    // 初始化 Skills 管理器
+    SkillManager.getInstance(context);
 
     // 注册侧边栏视图
     const sidebarProvider = new SidebarProvider(context.extensionUri);

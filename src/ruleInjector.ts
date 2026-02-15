@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import { t } from './i18n';
+import { SkillManager } from './skillManager';
 
 export class RuleInjector {
     private homeDir: string;
@@ -128,6 +129,12 @@ export class RuleInjector {
             '- Maximum 3 attempts, 2 seconds interval between each',
             '- After 3 failures, in native dialog, ask user to check if plugin service is running',
             '',
+            '## ⚠️ Image Handling Rules (Important):',
+            '- If the HTTP response contains "image_paths", user has uploaded images',
+            '- You MUST use the read_file tool to view each image path to understand what the user is showing you',
+            '- Example response with images: {"action":"continue","message":"...","image_paths":["/tmp/ai-dialog-images/img_xxx.png"],"image_hint":"..."}',
+            '- After viewing images, incorporate the visual information into your response',
+            '',
             '## Parameter Description:',
             '- summary: AI complete response content (required, supports Markdown format)',
             '',
@@ -159,9 +166,14 @@ export class RuleInjector {
 
         const rules = this.getGlobalRules();
 
+        // 拼接激活的 Skills 内容
+        const skillManager = SkillManager.getInstance();
+        const skillsContent = skillManager ? skillManager.getActiveSkillsContent() : '';
+        const fullRules = skillsContent ? rules + '\n' + skillsContent : rules;
+
         // 写入 user_global.md - 这是 Windsurf 的全局用户规则文件
         const userGlobalFile = path.join(memoriesDir, 'user_global.md');
-        fs.writeFileSync(userGlobalFile, rules, 'utf-8');
+        fs.writeFileSync(userGlobalFile, fullRules, 'utf-8');
         console.log(t('extension.rules.injected'), userGlobalFile);
 
         // 同时写入 global_rules.md 作为备份
